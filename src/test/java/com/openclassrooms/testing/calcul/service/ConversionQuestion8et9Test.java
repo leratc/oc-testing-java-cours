@@ -1,15 +1,15 @@
 package com.openclassrooms.testing.calcul.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.openclassrooms.testing.calcul.domain.model.ConversionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,14 +42,17 @@ public class ConversionQuestion8et9Test {
 		batchConversionService.batchConvert(operations);
 
 		// THEN
-		// ...
-
-	}
-
+		verify(conversionService, times(2)).calculate(conversionModelCaptor.capture());
+		List<ConversionModel> conversionModels = conversionModelCaptor.getAllValues();
+		assertThat(conversionModels)
+				.extracting(ConversionModel::getArgument, ConversionModel::getConversionType)
+				.containsExactly(tuple(32., ConversionType.FARENHEIT_TO_CELSIUS),
+						tuple(10., ConversionType.GALLON_TO_LITRE));
+			}
 	@Test
 	public void givenConversionsList_whenbatchConvert_thenCallsServiceAndReturnsAnswer() {
 		// GIVEN
-		final Stream<String> operations = Arrays.asList("32. °F->°C", "10. GAL->L", "37.8 L->GAL", "0. °C->°F")
+		final Stream<String> operations = Arrays.asList("10. °F->°C", "10. GAL->L", "35 L->GAL", "35. °C->°F")
 				.stream();
 		when(conversionService.calculate(any(ConversionModel.class)))
 				.then(invocation -> {
